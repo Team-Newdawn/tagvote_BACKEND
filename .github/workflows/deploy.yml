@@ -1,0 +1,84 @@
+name: Deploy Tagvote
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      EC2_SSH_USER: ec2-user
+      EC2_SSH_PORT: "22"
+      EC2_DEPLOY_PATH: /home/ec2-user/apps/tagvote
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Grant execute permission for Gradle wrapper
+        run: chmod +x ./gradlew
+
+      - name: Build and test
+        run: ./gradlew clean test bootJar
+
+      - name: Prepare deployment bundle
+        env:
+          ENV_FILE: ${{ secrets.ENV_FILE }}
+        run: |
+          mkdir -p deploy-bundle/build/libs
+          mkdir -p deploy-bundle/docker/mysql/init
+          mkdir -p deploy-bundle/deploy/nginx
+          cp Dockerfile deploy-bundle/
+          cp .dockerignore deploy-bundle/
+          cp docker-compose.yml deploy-bundle/
+          cp .env.prod.example deploy-bundle/
+          cp build/libs/tagvote.jar deploy-bundle/build/libs/tagvote.jar
+          cp docker/mysql/init/001-init.sql deploy-bundle/docker/mysql/init/001-init.sql
+          cp deploy/nginx/vote.newdawnsoi.site.conf deploy-bundle/deploy/nginx/vote.newdawnsoi.site.conf
+          printf '%s\n' "$ENV_FILE" > deploy-bundle/.env
+          tar -czf tagvote-deploy.tar.gz -C deploy-bundle .
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -p "${EC2_SSH_PORT}" -H "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Prepare remote directory
+        run: |
+          ssh -p "${EC2_SSH_PORT}" "${EC2_SSH_USER}@${{ secrets.EC2_HOST }}" \
+            "mkdir -p '${EC2_DEPLOY_PATH}'"
+
+      - name: Upload deployment bundle
+        run: |
+          scp -P "${EC2_SSH_PORT}" tagvote-deploy.tar.gz \
+            "${EC2_SSH_USER}@${{ secrets.EC2_HOST }}:${EC2_DEPLOY_PATH}/tagvote-deploy.tar.gz"
+
+      - name: Deploy on EC2
+        run: |
+          ssh -p "${EC2_SSH_PORT}" "${EC2_SSH_USER}@${{ secrets.EC2_HOST }}" <<EOF
+            set -e
+            mkdir -p "${EC2_DEPLOY_PATH}"
+            mkdir -p "${EC2_DEPLOY_PATH}/current"
+            tar -xzf "${EC2_DEPLOY_PATH}/tagvote-deploy.tar.gz" -C "${EC2_DEPLOY_PATH}/current"
+            rm -f "${EC2_DEPLOY_PATH}/tagvote-deploy.tar.gz"
+            cd "${EC2_DEPLOY_PATH}/current"
+
+            docker compose up -d --build
+
+            sudo cp deploy/nginx/vote.newdawnsoi.site.conf /etc/nginx/sites-available/vote.newdawnsoi.site.conf
+            sudo ln -sfn /etc/nginx/sites-available/vote.newdawnsoi.site.conf /etc/nginx/sites-enabled/vote.newdawnsoi.site.conf
+            sudo nginx -t
+            sudo systemctl reload nginx
+          EOF
