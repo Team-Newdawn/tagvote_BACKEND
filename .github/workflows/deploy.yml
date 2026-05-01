@@ -41,7 +41,6 @@ jobs:
           cp Dockerfile deploy-bundle/
           cp .dockerignore deploy-bundle/
           cp docker-compose.yml deploy-bundle/
-          cp .env.prod.example deploy-bundle/
           cp build/libs/tagvote.jar deploy-bundle/build/libs/tagvote.jar
           cp docker/mysql/init/001-init.sql deploy-bundle/docker/mysql/init/001-init.sql
           cp deploy/nginx/vote.newdawnsoi.site.conf deploy-bundle/deploy/nginx/vote.newdawnsoi.site.conf
