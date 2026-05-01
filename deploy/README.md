@@ -34,6 +34,7 @@ MYSQL_PASSWORD=change-me-app
 - Nginx installed on the host
 - TLS certificate already issued for `vote.newdawnsoi.site`
 - The SSH user can run `sudo nginx -t` and `sudo systemctl reload nginx`
+- If you want external DB access, allow inbound `3307` only from trusted source IPs and keep `3306` blocked
 
 ## Nginx
 
