@@ -25,17 +25,8 @@ public class SecurityConfig {
                 .logout(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/votes").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/public/votes/*/display").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/public/votes/*/events").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/public/votes/*/questions").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/public/questions/*/tags").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/public/questions/*/tags").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/public/tags/*").permitAll()
-                        .requestMatchers(HttpMethod.PATCH, "/api/public/tags/*").permitAll()
-                        .requestMatchers(HttpMethod.DELETE, "/api/public/tags/*").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/public/event-users").permitAll()
+                        .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers(
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",

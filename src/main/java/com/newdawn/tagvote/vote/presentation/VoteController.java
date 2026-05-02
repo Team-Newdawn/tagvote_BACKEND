@@ -32,7 +32,7 @@ public class VoteController {
         this.tagSseService = tagSseService;
     }
 
-    @PostMapping("/api/votes")
+    @PostMapping("/api/public/votes")
     public ResponseEntity<VoteResponse> create(@Valid @RequestBody final VoteCreateRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(voteService.create(request));
     }
