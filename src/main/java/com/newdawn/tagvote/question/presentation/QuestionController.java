@@ -5,6 +5,8 @@ import com.newdawn.tagvote.question.application.dto.QuestionCreateRequest;
 import com.newdawn.tagvote.question.application.dto.QuestionResponse;
 import com.newdawn.tagvote.question.application.dto.QuestionUpdateRequest;
 import com.newdawn.tagvote.question.application.dto.QuestionWithTagsResponse;
+import com.newdawn.tagvote.global.web.TaglowSessionIdResolver;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,9 +24,14 @@ import java.util.List;
 public class QuestionController {
 
     private final QuestionService questionService;
+    private final TaglowSessionIdResolver taglowSessionIdResolver;
 
-    public QuestionController(final QuestionService questionService) {
+    public QuestionController(
+            final QuestionService questionService,
+            final TaglowSessionIdResolver taglowSessionIdResolver
+    ) {
         this.questionService = questionService;
+        this.taglowSessionIdResolver = taglowSessionIdResolver;
     }
 
     @PostMapping("/api/questions")
@@ -57,7 +64,12 @@ public class QuestionController {
     }
 
     @GetMapping("/api/public/votes/{voteId}/questions")
-    public ResponseEntity<List<QuestionWithTagsResponse>> getPublicQuestionList(@PathVariable final Long voteId) {
-        return ResponseEntity.ok(questionService.getPublicQuestionList(voteId));
+    public ResponseEntity<List<QuestionWithTagsResponse>> getPublicQuestionList(
+            @PathVariable final Long voteId,
+            final HttpServletRequest httpServletRequest
+    ) {
+        return ResponseEntity.ok(
+                questionService.getPublicQuestionList(voteId, taglowSessionIdResolver.resolve(httpServletRequest))
+        );
     }
 }

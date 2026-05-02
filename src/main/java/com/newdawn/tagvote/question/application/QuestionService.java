@@ -101,10 +101,10 @@ public class QuestionService {
     }
 
     @Transactional(readOnly = true)
-    public List<QuestionWithTagsResponse> getPublicQuestionList(final Long voteId) {
+    public List<QuestionWithTagsResponse> getPublicQuestionList(final Long voteId, final String requestSessionId) {
         findVote(voteId);
         return questionRepository.findAllWithTagsByVoteId(voteId).stream()
-                .map(this::toQuestionWithTagsResponse)
+                .map(question -> toQuestionWithTagsResponse(question, requestSessionId))
                 .toList();
     }
 
@@ -120,9 +120,15 @@ public class QuestionService {
     }
 
     private QuestionWithTagsResponse toQuestionWithTagsResponse(final Question question) {
+        return toQuestionWithTagsResponse(question, null);
+    }
+
+    private QuestionWithTagsResponse toQuestionWithTagsResponse(final Question question, final String requestSessionId) {
         return new QuestionWithTagsResponse(
                 QuestionResponse.from(question),
-                question.getTags().stream().map(TagResponse::from).toList()
+                question.getTags().stream()
+                        .map(tag -> TagResponse.from(tag, requestSessionId))
+                        .toList()
         );
     }
 }

@@ -1,12 +1,14 @@
 package com.newdawn.tagvote.vote.presentation;
 
 import com.newdawn.tagvote.tag.application.TagSseService;
+import com.newdawn.tagvote.global.web.TaglowSessionIdResolver;
 import com.newdawn.tagvote.vote.application.VoteService;
 import com.newdawn.tagvote.vote.application.dto.VoteCreateRequest;
 import com.newdawn.tagvote.vote.application.dto.VoteDisplayResponse;
 import com.newdawn.tagvote.vote.application.dto.VoteResponse;
 import com.newdawn.tagvote.vote.application.dto.VoteUpdateRequest;
 import jakarta.validation.Valid;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,10 +28,16 @@ public class VoteController {
 
     private final VoteService voteService;
     private final TagSseService tagSseService;
+    private final TaglowSessionIdResolver taglowSessionIdResolver;
 
-    public VoteController(final VoteService voteService, final TagSseService tagSseService) {
+    public VoteController(
+            final VoteService voteService,
+            final TagSseService tagSseService,
+            final TaglowSessionIdResolver taglowSessionIdResolver
+    ) {
         this.voteService = voteService;
         this.tagSseService = tagSseService;
+        this.taglowSessionIdResolver = taglowSessionIdResolver;
     }
 
     @PostMapping("/api/public/votes")
@@ -62,12 +70,15 @@ public class VoteController {
     }
 
     @GetMapping("/api/public/votes/{voteId}/display")
-    public ResponseEntity<VoteDisplayResponse> getDisplay(@PathVariable final Long voteId) {
-        return ResponseEntity.ok(voteService.getPublicVoteDisplay(voteId));
+    public ResponseEntity<VoteDisplayResponse> getDisplay(
+            @PathVariable final Long voteId,
+            final HttpServletRequest httpServletRequest
+    ) {
+        return ResponseEntity.ok(voteService.getPublicVoteDisplay(voteId, taglowSessionIdResolver.resolve(httpServletRequest)));
     }
 
     @GetMapping("/api/public/votes/{voteId}/events")
-    public SseEmitter subscribe(@PathVariable final Long voteId) {
-        return tagSseService.subscribe(voteId);
+    public SseEmitter subscribe(@PathVariable final Long voteId, final HttpServletRequest httpServletRequest) {
+        return tagSseService.subscribe(voteId, taglowSessionIdResolver.resolve(httpServletRequest));
     }
 }

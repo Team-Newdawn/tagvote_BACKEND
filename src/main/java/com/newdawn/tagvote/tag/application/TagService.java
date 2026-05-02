@@ -37,36 +37,34 @@ public class TagService {
     }
 
     @Transactional(readOnly = true)
-    public List<TagResponse> getTagsByQuestion(final Long questionId) {
+    public List<TagResponse> getTagsByQuestion(final Long questionId, final String requestSessionId) {
         requireQuestion(questionId);
         return tagRepository.findAllByQuestionIdOrderByIdAsc(questionId).stream()
-                .map(TagResponse::from)
+                .map(tag -> TagResponse.from(tag, requestSessionId))
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public TagResponse getTag(final Long tagId) {
-        return TagResponse.from(findTag(tagId));
+    public TagResponse getTag(final Long tagId, final String requestSessionId) {
+        return TagResponse.from(findTag(tagId), requestSessionId);
     }
 
     @Transactional
-    public TagResponse create(final Long questionId, final TagCreateRequest request) {
+    public TagResponse create(final Long questionId, final TagCreateRequest request, final String requestSessionId) {
         Question question = requireQuestion(questionId);
-        Tag tag = TagFactory.create(request, question);
+        Tag tag = TagFactory.create(request, question, requestSessionId);
         Tag savedTag = tagRepository.saveAndFlush(tag);
-        TagResponse response = TagResponse.from(savedTag);
+        TagResponse response = TagResponse.from(savedTag, requestSessionId);
 
-        publishAfterCommit(new TagCreatedEventResponse(
-                question.getVote().getId(),
-                question.getId(),
-                response
-        ));
+        Long voteId = question.getVote().getId();
+        Long savedQuestionId = question.getId();
+        publishAfterCommit(voteId, savedQuestionId, savedTag);
 
         return response;
     }
 
     @Transactional
-    public TagResponse update(final Long tagId, final TagUpdateRequest request) {
+    public TagResponse update(final Long tagId, final TagUpdateRequest request, final String requestSessionId) {
         Tag tag = findTag(tagId);
 
         if (request.type() != null) {
@@ -85,12 +83,15 @@ public class TagService {
             tag.changeLocationY(request.locationY());
         }
 
-        return TagResponse.from(tagRepository.saveAndFlush(tag));
+        return TagResponse.from(tagRepository.saveAndFlush(tag), requestSessionId);
     }
 
     @Transactional
-    public void delete(final Long tagId) {
+    public void delete(final Long tagId, final String requestSessionId) {
         Tag tag = findTag(tagId);
+        if (!tag.belongsToSession(requestSessionId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can delete only your own tag");
+        }
         tag.getQuestion().removeTag(tag);
         tagRepository.delete(tag);
     }
@@ -105,16 +106,16 @@ public class TagService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tag not found"));
     }
 
-    private void publishAfterCommit(final TagCreatedEventResponse eventResponse) {
+    private void publishAfterCommit(final Long voteId, final Long questionId, final Tag savedTag) {
         if (!TransactionSynchronizationManager.isSynchronizationActive()) {
-            tagSseService.publishTagCreated(eventResponse);
+            tagSseService.publishTagCreated(voteId, questionId, savedTag);
             return;
         }
 
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
             @Override
             public void afterCommit() {
-                tagSseService.publishTagCreated(eventResponse);
+                tagSseService.publishTagCreated(voteId, questionId, savedTag);
             }
         });
     }

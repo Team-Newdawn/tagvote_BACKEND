@@ -49,12 +49,23 @@ public class Tag extends BaseTimeEntity {
     @Column(name = "location_y")
     private Float locationY;
 
-    Tag(final TagType type, final String data, final Integer duration, final Float locationX, final Float locationY) {
+    @Column(name = "session_id", length = 100)
+    private String sessionId;
+
+    Tag(
+            final TagType type,
+            final String data,
+            final Integer duration,
+            final Float locationX,
+            final Float locationY,
+            final String sessionId
+    ) {
         this.type = type;
         this.data = Objects.requireNonNull(data, "data must not be null");
         this.duration = Objects.requireNonNull(duration, "duration must not be null");
         this.locationX = locationX;
         this.locationY = locationY;
+        this.sessionId = sessionId;
     }
 
     public void changeType(final TagType type) {
@@ -75,6 +86,10 @@ public class Tag extends BaseTimeEntity {
 
     public void changeLocationY(final Float locationY) {
         this.locationY = locationY;
+    }
+
+    public boolean belongsToSession(final String requestSessionId) {
+        return requestSessionId != null && requestSessionId.equals(sessionId);
     }
 
     public void assignQuestion(final Question question) {

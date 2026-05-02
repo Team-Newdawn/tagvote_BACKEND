@@ -10,16 +10,18 @@ public record VoteResponse(
         Long createdByUserId,
         String name,
         VoteStatus status,
+        boolean isMine,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {
 
-    public static VoteResponse from(final Vote vote) {
+    public static VoteResponse from(final Vote vote, final Long currentUserId) {
         return new VoteResponse(
                 vote.getId(),
                 vote.getCreatedBy().getId(),
                 vote.getName(),
                 vote.getStatus(),
+                currentUserId != null && vote.getCreatedBy().getId().equals(currentUserId),
                 vote.getCreatedAt(),
                 vote.getUpdatedAt()
         );

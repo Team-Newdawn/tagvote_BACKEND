@@ -4,6 +4,8 @@ import com.newdawn.tagvote.tag.application.TagService;
 import com.newdawn.tagvote.tag.application.dto.TagCreateRequest;
 import com.newdawn.tagvote.tag.application.dto.TagResponse;
 import com.newdawn.tagvote.tag.application.dto.TagUpdateRequest;
+import com.newdawn.tagvote.global.web.TaglowSessionIdResolver;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,40 +23,52 @@ import java.util.List;
 public class TagController {
 
     private final TagService tagService;
+    private final TaglowSessionIdResolver taglowSessionIdResolver;
 
-    public TagController(final TagService tagService) {
+    public TagController(final TagService tagService, final TaglowSessionIdResolver taglowSessionIdResolver) {
         this.tagService = tagService;
+        this.taglowSessionIdResolver = taglowSessionIdResolver;
     }
 
     @PostMapping("/api/public/questions/{questionId}/tags")
     public ResponseEntity<TagResponse> create(
             @PathVariable final Long questionId,
-            @Valid @RequestBody final TagCreateRequest request
+            @Valid @RequestBody final TagCreateRequest request,
+            final HttpServletRequest httpServletRequest
     ) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(tagService.create(questionId, request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                tagService.create(questionId, request, taglowSessionIdResolver.require(httpServletRequest))
+        );
     }
 
     @GetMapping("/api/public/questions/{questionId}/tags")
-    public ResponseEntity<List<TagResponse>> getByQuestion(@PathVariable final Long questionId) {
-        return ResponseEntity.ok(tagService.getTagsByQuestion(questionId));
+    public ResponseEntity<List<TagResponse>> getByQuestion(
+            @PathVariable final Long questionId,
+            final HttpServletRequest httpServletRequest
+    ) {
+        return ResponseEntity.ok(tagService.getTagsByQuestion(questionId, taglowSessionIdResolver.resolve(httpServletRequest)));
     }
 
-    @GetMapping("/api/public/tags/{tagId}")
-    public ResponseEntity<TagResponse> getById(@PathVariable final Long tagId) {
-        return ResponseEntity.ok(tagService.getTag(tagId));
+    @GetMapping("/api/public/tags/{tagId}")    
+    public ResponseEntity<TagResponse> getById(
+            @PathVariable final Long tagId,
+            final HttpServletRequest httpServletRequest
+    ) {
+        return ResponseEntity.ok(tagService.getTag(tagId, taglowSessionIdResolver.resolve(httpServletRequest)));
     }
 
     @PatchMapping("/api/public/tags/{tagId}")
     public ResponseEntity<TagResponse> update(
             @PathVariable final Long tagId,
-            @Valid @RequestBody final TagUpdateRequest request
+            @Valid @RequestBody final TagUpdateRequest request,
+            final HttpServletRequest httpServletRequest
     ) {
-        return ResponseEntity.ok(tagService.update(tagId, request));
+        return ResponseEntity.ok(tagService.update(tagId, request, taglowSessionIdResolver.resolve(httpServletRequest)));
     }
 
-    @DeleteMapping("/api/public/tags/{tagId}")
-    public ResponseEntity<Void> delete(@PathVariable final Long tagId) {
-        tagService.delete(tagId);
+    @DeleteMapping("/api/public/tags/{tagId}")    
+    public ResponseEntity<Void> delete(@PathVariable final Long tagId, final HttpServletRequest httpServletRequest) {
+        tagService.delete(tagId, taglowSessionIdResolver.require(httpServletRequest));
         return ResponseEntity.noContent().build();
     }
 }

@@ -47,11 +47,16 @@ public class VoteService {
 
     @Transactional
     public VoteResponse create(final VoteCreateRequest request) {
-        User createdBy = userRepository.findById(request.createdByUserId())
+        SessionUserPrincipal principal = currentUserProvider.getCurrentUserOrNull();
+        Long creatorUserId = principal != null ? principal.userId() : request.createdByUserId();
+        if (creatorUserId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "createdByUserId is required");
+        }
+        User createdBy = userRepository.findById(creatorUserId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         Vote vote = VoteFactory.create(request, createdBy);
-        return VoteResponse.from(voteRepository.saveAndFlush(vote));
+        return VoteResponse.from(voteRepository.saveAndFlush(vote), principal != null ? principal.userId() : null);
     }
 
     @Transactional(readOnly = true)
@@ -62,13 +67,15 @@ public class VoteService {
                 ? voteRepository.findAll(Sort.by(Sort.Direction.ASC, "id"))
                 : voteRepository.findAllByCreatedByIdOrderByIdAsc(principal.userId());
 
-        return votes.stream().map(VoteResponse::from).toList();
+        return votes.stream()
+                .map(vote -> VoteResponse.from(vote, principal.userId()))
+                .toList();
     }
 
     @Transactional(readOnly = true)
     public VoteResponse getAccessibleVote(final Long voteId) {
         SessionUserPrincipal principal = currentUserProvider.requireCurrentUser();
-        return VoteResponse.from(findAccessibleVote(voteId, principal));
+        return VoteResponse.from(findAccessibleVote(voteId, principal), principal.userId());
     }
 
     @Transactional
@@ -83,7 +90,7 @@ public class VoteService {
             vote.changeStatus(request.status());
         }
 
-        return VoteResponse.from(voteRepository.saveAndFlush(vote));
+        return VoteResponse.from(voteRepository.saveAndFlush(vote), principal.userId());
     }
 
     @Transactional
@@ -93,10 +100,10 @@ public class VoteService {
     }
 
     @Transactional(readOnly = true)
-    public VoteDisplayResponse getPublicVoteDisplay(final Long voteId) {
+    public VoteDisplayResponse getPublicVoteDisplay(final Long voteId, final String requestSessionId) {
         Vote vote = findVote(voteId);
         List<QuestionWithTagsResponse> questions = questionRepository.findAllWithTagsByVoteId(voteId).stream()
-                .map(this::toQuestionWithTagsResponse)
+                .map(question -> toQuestionWithTagsResponse(question, requestSessionId))
                 .toList();
 
         return new VoteDisplayResponse(vote.getId(), vote.getName(), vote.getStatus(), questions);
@@ -115,10 +122,12 @@ public class VoteService {
         return vote;
     }
 
-    private QuestionWithTagsResponse toQuestionWithTagsResponse(final Question question) {
+    private QuestionWithTagsResponse toQuestionWithTagsResponse(final Question question, final String requestSessionId) {
         return new QuestionWithTagsResponse(
                 QuestionResponse.from(question),
-                question.getTags().stream().map(TagResponse::from).toList()
+                question.getTags().stream()
+                        .map(tag -> TagResponse.from(tag, requestSessionId))
+                        .toList()
         );
     }
 }

@@ -13,11 +13,14 @@ public record TagResponse(
         Integer duration,
         Float locationX,
         Float locationY,
+        boolean isMine,
+        boolean canDelete,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {
 
-    public static TagResponse from(final Tag tag) {
+    public static TagResponse from(final Tag tag, final String requestSessionId) {
+        boolean isMine = tag.belongsToSession(requestSessionId);
         return new TagResponse(
                 tag.getId(),
                 tag.getQuestion().getId(),
@@ -26,6 +29,8 @@ public record TagResponse(
                 tag.getDuration(),
                 tag.getLocationX(),
                 tag.getLocationY(),
+                isMine,
+                isMine,
                 tag.getCreatedAt(),
                 tag.getUpdatedAt()
         );

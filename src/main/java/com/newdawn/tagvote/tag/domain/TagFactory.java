@@ -8,13 +8,14 @@ public final class TagFactory {
     private TagFactory() {
     }
 
-    public static Tag create(final TagCreateRequest request, final Question question) {
+    public static Tag create(final TagCreateRequest request, final Question question, final String sessionId) {
         Tag tag = new Tag(
                 request.type(),
                 request.data(),
                 request.duration(),
                 request.locationX(),
-                request.locationY()
+                request.locationY(),
+                sessionId
         );
         question.addTag(tag);
         return tag;

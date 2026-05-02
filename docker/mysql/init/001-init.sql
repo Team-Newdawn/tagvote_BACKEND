@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS `tag` (
     `duration` INT NOT NULL,
     `location_x` FLOAT,
     `location_y` FLOAT,
+    `session_id` VARCHAR(100),
     `created_at` DATETIME(6) NOT NULL,
     `updated_at` DATETIME(6) NOT NULL,
     CONSTRAINT `fk_tag_question`

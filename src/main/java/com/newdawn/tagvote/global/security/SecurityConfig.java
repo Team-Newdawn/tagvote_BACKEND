@@ -68,7 +68,15 @@ public class SecurityConfig {
                 "https://taglow-acca6.firebaseapp.com"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PATCH", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("*"));
+        config.setAllowedHeaders(List.of(
+                "Accept",
+                "Authorization",
+                "Content-Type",
+                "Origin",
+                "X-Requested-With",
+                "X-Taglow-Session-Id",
+                "taglow-Session-Id"
+        ));
         config.setExposedHeaders(List.of("Location"));
         config.setAllowCredentials(false);
         config.setMaxAge(3600L);

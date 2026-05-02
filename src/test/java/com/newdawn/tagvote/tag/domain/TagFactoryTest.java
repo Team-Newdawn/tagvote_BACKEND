@@ -25,9 +25,14 @@ class TagFactoryTest {
                 vote
         );
 
-        Tag tag = TagFactory.create(new TagCreateRequest(1L, TagType.TEXT, "payload", 10, 1.0f, 2.0f), question);
+        Tag tag = TagFactory.create(
+                new TagCreateRequest(1L, TagType.TEXT, "payload", 10, 1.0f, 2.0f),
+                question,
+                "session-123"
+        );
 
         assertThat(tag.getQuestion()).isEqualTo(question);
         assertThat(question.getTags()).containsExactly(tag);
+        assertThat(tag.getSessionId()).isEqualTo("session-123");
     }
 }
