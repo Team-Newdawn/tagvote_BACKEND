@@ -57,15 +57,7 @@ public class QuestionController {
     }
 
     @GetMapping("/api/public/votes/{voteId}/questions")
-    public ResponseEntity<List<QuestionResponse>> getPublicQuestionList(@PathVariable final Long voteId) {
+    public ResponseEntity<List<QuestionWithTagsResponse>> getPublicQuestionList(@PathVariable final Long voteId) {
         return ResponseEntity.ok(questionService.getPublicQuestionList(voteId));
-    }
-
-    @GetMapping("/api/public/votes/{voteId}/questions/{questionId}")
-    public ResponseEntity<QuestionWithTagsResponse> getPublicQuestionWithTags(
-            @PathVariable final Long voteId,
-            @PathVariable final Long questionId
-    ) {
-        return ResponseEntity.ok(questionService.getPublicQuestionWithTags(voteId, questionId));
     }
 }

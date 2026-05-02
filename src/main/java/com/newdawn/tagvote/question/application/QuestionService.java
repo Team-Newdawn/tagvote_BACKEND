@@ -101,23 +101,11 @@ public class QuestionService {
     }
 
     @Transactional(readOnly = true)
-    public List<QuestionResponse> getPublicQuestionList(final Long voteId) {
+    public List<QuestionWithTagsResponse> getPublicQuestionList(final Long voteId) {
         findVote(voteId);
-        return questionRepository.findAllByVoteIdOrderByIdAsc(voteId).stream()
-                .map(QuestionResponse::from)
+        return questionRepository.findAllWithTagsByVoteId(voteId).stream()
+                .map(this::toQuestionWithTagsResponse)
                 .toList();
-    }
-
-    @Transactional(readOnly = true)
-    public QuestionWithTagsResponse getPublicQuestionWithTags(final Long voteId, final Long questionId) {
-        Question question = questionRepository.findWithVoteAndTagsById(questionId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Question not found"));
-
-        if (!question.getVote().getId().equals(voteId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Question does not belong to the vote");
-        }
-
-        return toQuestionWithTagsResponse(question);
     }
 
     private Vote findVote(final Long voteId) {

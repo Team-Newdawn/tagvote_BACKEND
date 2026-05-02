@@ -27,12 +27,20 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/votes").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/public/votes/*/display").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/public/votes/*/events").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/public/votes/*/questions").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/public/questions/*/tags").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/public/questions/*/tags").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/public/tags/*").permitAll()
+                        .requestMatchers(HttpMethod.PATCH, "/api/public/tags/*").permitAll()
+                        .requestMatchers(HttpMethod.DELETE, "/api/public/tags/*").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/public/event-users").permitAll()
                         .requestMatchers(
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**"
                         ).permitAll()
-                        .requestMatchers("/api/public/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
