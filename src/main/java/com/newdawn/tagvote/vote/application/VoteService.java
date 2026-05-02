@@ -47,8 +47,7 @@ public class VoteService {
 
     @Transactional
     public VoteResponse create(final VoteCreateRequest request) {
-        SessionUserPrincipal principal = currentUserProvider.requireCurrentUser();
-        User createdBy = userRepository.findById(principal.userId())
+        User createdBy = userRepository.findById(request.createdByUserId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         Vote vote = VoteFactory.create(request, createdBy);
