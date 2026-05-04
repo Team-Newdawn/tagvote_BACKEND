@@ -60,29 +60,53 @@ public class SecurityConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOriginPatterns(List.of(
+        CorsConfiguration publicApiConfig = new CorsConfiguration();
+        publicApiConfig.setAllowedOriginPatterns(List.of(
                 "http://localhost:*",
                 "http://127.0.0.1:*",
+                "https://taglow-player.web.app",
+                "https://taglow-participant.web.app",
+                "https://taglow-admin.web.app",
                 "https://taglow-acca6.web.app",
                 "https://taglow-acca6.firebaseapp.com"
         ));
-        config.setAllowedMethods(List.of("GET", "POST", "PATCH", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of(
+        publicApiConfig.setAllowedMethods(List.of("GET", "POST", "PATCH", "DELETE", "OPTIONS"));
+        publicApiConfig.setAllowedHeaders(List.of(
                 "Accept",
                 "Authorization",
                 "Content-Type",
                 "Origin",
                 "X-Requested-With",
+                "X-CSRF-TOKEN",
                 "X-Taglow-Session-Id",
                 "taglow-Session-Id"
         ));
-        config.setExposedHeaders(List.of("Location"));
-        config.setAllowCredentials(false);
-        config.setMaxAge(3600L);
+        publicApiConfig.setExposedHeaders(List.of("Location"));
+        publicApiConfig.setAllowCredentials(false);
+        publicApiConfig.setMaxAge(3600L);
+
+        CorsConfiguration privateApiConfig = new CorsConfiguration();
+        privateApiConfig.setAllowedOriginPatterns(List.of(
+                "http://localhost:*",
+                "http://127.0.0.1:*",
+                "https://taglow-admin.web.app"
+        ));
+        privateApiConfig.setAllowedMethods(List.of("GET", "POST", "PATCH", "DELETE", "OPTIONS"));
+        privateApiConfig.setAllowedHeaders(List.of(
+                "Accept",
+                "Authorization",
+                "Content-Type",
+                "Origin",
+                "X-Requested-With",
+                "X-CSRF-TOKEN"
+        ));
+        privateApiConfig.setExposedHeaders(List.of("Location"));
+        privateApiConfig.setAllowCredentials(true);
+        privateApiConfig.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/api/**", config);
+        source.registerCorsConfiguration("/api/public/**", publicApiConfig);
+        source.registerCorsConfiguration("/api/**", privateApiConfig);
         return source;
     }
 }
