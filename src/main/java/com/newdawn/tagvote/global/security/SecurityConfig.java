@@ -67,6 +67,7 @@ public class SecurityConfig {
                 "https://taglow-player.web.app",
                 "https://taglow-participant.web.app",
                 "https://taglow-admin.web.app",
+                "https://admin.newdawnsoi.site",
                 "https://taglow-acca6.web.app",
                 "https://taglow-acca6.firebaseapp.com"
         ));
@@ -89,7 +90,8 @@ public class SecurityConfig {
         privateApiConfig.setAllowedOriginPatterns(List.of(
                 "http://localhost:*",
                 "http://127.0.0.1:*",
-                "https://taglow-admin.web.app"
+                "https://taglow-admin.web.app",
+                "https://admin.newdawnsoi.site"
         ));
         privateApiConfig.setAllowedMethods(List.of("GET", "POST", "PATCH", "DELETE", "OPTIONS"));
         privateApiConfig.setAllowedHeaders(List.of(
