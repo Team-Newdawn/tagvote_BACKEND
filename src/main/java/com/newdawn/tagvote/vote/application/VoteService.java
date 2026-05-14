@@ -9,10 +9,7 @@ import com.newdawn.tagvote.question.domain.QuestionRepository;
 import com.newdawn.tagvote.tag.application.dto.TagResponse;
 import com.newdawn.tagvote.user.domain.User;
 import com.newdawn.tagvote.user.domain.UserRepository;
-import com.newdawn.tagvote.vote.application.dto.VoteCreateRequest;
-import com.newdawn.tagvote.vote.application.dto.VoteDisplayResponse;
-import com.newdawn.tagvote.vote.application.dto.VoteResponse;
-import com.newdawn.tagvote.vote.application.dto.VoteUpdateRequest;
+import com.newdawn.tagvote.vote.application.dto.*;
 import com.newdawn.tagvote.vote.domain.Vote;
 import com.newdawn.tagvote.vote.domain.VoteFactory;
 import com.newdawn.tagvote.vote.domain.VoteRepository;
@@ -60,16 +57,23 @@ public class VoteService {
     }
 
     @Transactional(readOnly = true)
-    public List<VoteResponse> getAllAccessibleVotes() {
+    public VoteResponseWithCount getAllAccessibleVotes() {
         SessionUserPrincipal principal = currentUserProvider.requireCurrentUser();
 
         List<Vote> votes = principal.isAdmin()
                 ? voteRepository.findAll(Sort.by(Sort.Direction.ASC, "id"))
                 : voteRepository.findAllByCreatedByIdOrderByIdAsc(principal.userId());
 
-        return votes.stream()
-                .map(vote -> VoteResponse.from(vote, principal.userId()))
-                .toList();
+        return toVoteResponseWithCount(votes, principal);
+    }
+
+    private VoteResponseWithCount toVoteResponseWithCount(List<Vote> votes, SessionUserPrincipal principal) {
+        return new VoteResponseWithCount(
+                votes.size(),
+                votes.stream()
+                        .map(vote -> VoteResponse.from(vote ,principal.userId()))
+                        .toList()
+        );
     }
 
     @Transactional(readOnly = true)

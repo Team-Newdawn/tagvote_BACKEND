@@ -3,10 +3,7 @@ package com.newdawn.tagvote.vote.presentation;
 import com.newdawn.tagvote.tag.application.TagSseService;
 import com.newdawn.tagvote.global.web.TaglowSessionIdResolver;
 import com.newdawn.tagvote.vote.application.VoteService;
-import com.newdawn.tagvote.vote.application.dto.VoteCreateRequest;
-import com.newdawn.tagvote.vote.application.dto.VoteDisplayResponse;
-import com.newdawn.tagvote.vote.application.dto.VoteResponse;
-import com.newdawn.tagvote.vote.application.dto.VoteUpdateRequest;
+import com.newdawn.tagvote.vote.application.dto.*;
 import jakarta.validation.Valid;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -46,7 +43,7 @@ public class VoteController {
     }
 
     @GetMapping("/api/votes")
-    public ResponseEntity<List<VoteResponse>> getAll() {
+    public ResponseEntity<VoteResponseWithCount> getAll() {
         return ResponseEntity.ok(voteService.getAllAccessibleVotes());
     }
 
