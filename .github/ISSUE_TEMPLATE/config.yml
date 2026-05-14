@@ -1,5 +1,1 @@
 blank_issues_enabled: false
-contact_links:
-  - name: API / 문서 확인
-    url: https://github.com/NewdawnSOI/tagvote/tree/main/docs
-    about: 이슈 등록 전 현재 문서와 API 명세를 먼저 확인해주세요.

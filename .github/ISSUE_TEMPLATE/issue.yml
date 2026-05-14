@@ -1,0 +1,10 @@
+name: Issue
+description: 제목과 내용만 입력하는 기본 이슈 템플릿입니다.
+body:
+  - type: textarea
+    id: content
+    attributes:
+      label: 내용
+      placeholder: 내용을 적어주세요.
+    validations:
+      required: true
