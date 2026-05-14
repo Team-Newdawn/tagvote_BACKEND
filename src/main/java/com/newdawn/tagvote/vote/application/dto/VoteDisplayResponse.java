@@ -9,6 +9,7 @@ public record VoteDisplayResponse(
         Long voteId,
         String voteName,
         VoteStatus status,
+        int questionCount,
         List<QuestionWithTagsResponse> questions
 ) {
 }

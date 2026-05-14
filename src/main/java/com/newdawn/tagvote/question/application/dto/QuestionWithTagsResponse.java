@@ -6,6 +6,7 @@ import java.util.List;
 
 public record QuestionWithTagsResponse(
         QuestionResponse question,
+        int tagCount,
         List<TagResponse> tags
 ) {
 }

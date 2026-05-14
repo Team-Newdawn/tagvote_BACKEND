@@ -32,7 +32,7 @@ public class EventUser extends BaseTimeEntity {
     private String phone;
 
     @JdbcTypeCode(SqlTypes.TINYINT)
-    @Column(name = "privacy_consent", nullable = false, columnDefinition = "TINYINT")
+    @Column(name = "privacy_consent", nullable = false)
     private boolean privacyConsent;
 
     EventUser(final String name, final String phone, final boolean privacyConsent) {
