@@ -43,7 +43,7 @@ public class VoteController {
     }
 
     @GetMapping("/api/votes")
-    public ResponseEntity<VoteResponseWithCount> getAll() {
+    public ResponseEntity<List<VoteResponseWithCount>> getAll() {
         return ResponseEntity.ok(voteService.getAllAccessibleVotes());
     }
 

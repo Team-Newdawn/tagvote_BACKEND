@@ -305,6 +305,8 @@ Request Body:
 - `ADMIN`: 전체 조회
 - `USER`: 본인이 생성한 투표만 조회
 
+Response `200 OK`: `VoteResponseWithCount[]`
+
 ### `GET /api/votes/{voteId}`
 
 설명: 특정 투표 조회
