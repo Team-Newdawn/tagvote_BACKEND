@@ -57,23 +57,16 @@ public class VoteService {
     }
 
     @Transactional(readOnly = true)
-    public VoteResponseWithCount getAllAccessibleVotes() {
+    public List<VoteResponseWithCount> getAllAccessibleVotes() {
         SessionUserPrincipal principal = currentUserProvider.requireCurrentUser();
 
         List<Vote> votes = principal.isAdmin()
                 ? voteRepository.findAll(Sort.by(Sort.Direction.ASC, "id"))
                 : voteRepository.findAllByCreatedByIdOrderByIdAsc(principal.userId());
 
-        return toVoteResponseWithCount(votes, principal);
-    }
-
-    private VoteResponseWithCount toVoteResponseWithCount(List<Vote> votes, SessionUserPrincipal principal) {
-        return new VoteResponseWithCount(
-                votes.size(),
-                votes.stream()
-                        .map(vote -> VoteResponse.from(vote ,principal.userId()))
-                        .toList()
-        );
+        return votes.stream()
+                .map(vote -> VoteResponseWithCount.from(vote, principal.userId()))
+                .toList();
     }
 
     @Transactional(readOnly = true)
