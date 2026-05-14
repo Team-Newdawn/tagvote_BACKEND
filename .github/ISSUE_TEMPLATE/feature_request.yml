@@ -1,0 +1,68 @@
+name: Feature Request
+description: 새로운 기능이나 개선 아이디어를 정리합니다.
+title: "[Feature] "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        무엇을 왜 바꾸려는지, 사용자 관점에서 어떤 문제가 해결되는지 중심으로 적어주세요.
+
+  - type: input
+    id: summary
+    attributes:
+      label: 기능 요약
+      placeholder: 예) 관리자 화면에서 투표 상태 일괄 종료 기능 추가
+    validations:
+      required: true
+
+  - type: textarea
+    id: background
+    attributes:
+      label: 배경 / 문제
+      description: 왜 이 기능이 필요한지 적어주세요.
+      placeholder: 현재 어떤 불편이나 제한이 있는지 설명해주세요.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 제안 내용
+      description: 원하는 동작을 구체적으로 적어주세요.
+      placeholder: |
+        - API:
+        - UI:
+        - 권한:
+        - 예외 처리:
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 완료 조건
+      description: 이슈가 닫히기 위한 조건을 체크리스트 형태로 적어주세요.
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reference
+    attributes:
+      label: 참고 자료
+      description: 화면 시안, 문서, 관련 이슈 링크 등을 적어주세요.
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 우선순위
+      options:
+        - high
+        - medium
+        - low
+    validations:
+      required: true
