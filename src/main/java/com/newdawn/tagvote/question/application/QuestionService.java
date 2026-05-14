@@ -126,6 +126,7 @@ public class QuestionService {
     private QuestionWithTagsResponse toQuestionWithTagsResponse(final Question question, final String requestSessionId) {
         return new QuestionWithTagsResponse(
                 QuestionResponse.from(question),
+                question.getTags().size(),
                 question.getTags().stream()
                         .map(tag -> TagResponse.from(tag, requestSessionId))
                         .toList()

@@ -106,7 +106,7 @@ public class VoteService {
                 .map(question -> toQuestionWithTagsResponse(question, requestSessionId))
                 .toList();
 
-        return new VoteDisplayResponse(vote.getId(), vote.getName(), vote.getStatus(), questions);
+        return new VoteDisplayResponse(vote.getId(), vote.getName(), vote.getStatus(), questions.size() ,questions);
     }
 
     private Vote findVote(final Long voteId) {
@@ -125,6 +125,7 @@ public class VoteService {
     private QuestionWithTagsResponse toQuestionWithTagsResponse(final Question question, final String requestSessionId) {
         return new QuestionWithTagsResponse(
                 QuestionResponse.from(question),
+                question.getTags().size(),
                 question.getTags().stream()
                         .map(tag -> TagResponse.from(tag, requestSessionId))
                         .toList()
